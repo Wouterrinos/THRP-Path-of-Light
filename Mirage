@@ -1,0 +1,60 @@
+%Wouter van Rijkom
+%4484649
+%19-10-2018
+
+clc
+clear all
+close all
+
+T_0 = 273.15 + 60;      % temperature of the tarmac in [K]
+R = 8.3144598;          % Universal gas constant in [J/mol*K]
+P_0 = 101325;           % Atmospheric pressure in [Pa]
+a = 2.1865e-29;         % Polerazibility of air in [m^3]
+L = -10;                % Lapse rate in [K/m]
+N_A = 6.02214e23;       % Avogadro constant in [mol^-1]
+
+A = ((4*pi)/3)*N_A*a;   % Molarrefractivity
+
+maxHeight = 10;         % The height to which to calculate the path of the light
+AmountOfSteps = 500001; % The amount of steps to cut the height difference in
+z = linspace(0,maxHeight,AmountOfSteps); % Fills an array with with all the values of the height, z
+b = (3*A*P_0)/R;
+n = 1+(b)/(2*T_0)-(L*b)/(2*T_0^2).*z;
+degrees = ones(0,numel(n)); % Empty array with all the values to put the angles in
+degrees(1) = 90;            % The first angle
+for i = 1:numel(n)-1        % Forloop to calculate the angle of refraction at each z value
+    degrees(i+1) = asind(n(i)/n(i+1)*sind(degrees(i)));
+end
+
+vector_x = zeros(0,numel(z));   % Empty array to fit the new x values in
+vector_x(1) = 0;                % The first value
+for j = 1:numel(z)-1            % Forloop that calculates every new x value using the angles calculates
+    vector_x(j+1) = vector_x(j) + maxHeight/AmountOfSteps*tand(degrees(j+1));
+end
+
+% The following things are just to replicate the first part of the graph,
+% but mirrored.
+z_start = zeros(0,1.8*(AmountOfSteps-1)/maxHeight);
+x_start = zeros(0,1.8*(AmountOfSteps-1)/maxHeight);
+for i = 1:(1.8*(AmountOfSteps-1)/maxHeight)
+    x_start(i) = -vector_x(1.8*(AmountOfSteps-1)/maxHeight+2-i);
+    z_start(i) = z(1.8*(AmountOfSteps-1)/maxHeight+2-i);
+end
+
+
+figure
+
+plot(vector_x,z)
+hold on
+plot(x_start,z_start)
+axis ([-225 350 0 10])
+%Minimal distance calculation
+%Calculated for a person that's 1.80m
+
+z_m = z(1.8*(AmountOfSteps-1)/maxHeight);
+x_m = z_m/cosd(degrees(1.8*(AmountOfSteps-1)/maxHeight))*cosd(90-degrees(1.8*(AmountOfSteps-1)/maxHeight));
+
+%The following part is to plot the line of sight of the person
+z_mm = [z_m, 0];
+x_mm = [-2*x_m,-x_m]; 
+plot(x_mm,z_mm,'ko-')
