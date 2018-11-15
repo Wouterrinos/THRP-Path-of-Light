@@ -1,0 +1,35 @@
+%Wouter van Rijkom
+%4484649
+%19-10-2018
+
+clc
+clear all
+close all
+
+%2.4.3
+n_0 = 1.4;          % Index of refraction at the middle of the fiber
+phi_0 = 70;         % Angle of entree
+a = n_0*sind(phi_0);% Calculates the constant a
+R = 0.05;           % Radius of the fiber
+beginx = 0;         % Start of of the fiber put at x = 0
+stopx = 10;         % End of the fiber 
+stepsx = 1e6;       % Size of the steps in which the fiber is cut up for calculation
+x = linspace(beginx, stopx, stepsx);    
+stepsize = (stopx-beginx)/stepsx;  % Calculates the size of the steps taken
+
+y = zeros(0,numel(x));  % Opens up space for an array to put the values of y in
+y(1) = 0;               % Sets the first value to 0
+n = zeros(0,numel(x));  % See above
+n(1) = n_0;             % See above
+phi = zeros(0,numel(x));% See above
+phi(1) = phi_0;         % See above
+
+for i = 1:numel(x)-1   % A for loop to calculate the path of the light by going through every x
+    y(i+1) = y(i) + stepsize/tan(phi(i));       % Calculates the new y-coordinate of the light
+    n(i+1) = n(i) + (-a)*y(i+1)/(R*1000000);    % Calculates the new index of refraction at that new y
+    phi(i+1) = asind(n(i)/n(i+1)*sind(phi(i))); % Calculates the angle to which the light is refracted because of the new n
+end
+
+figure     
+plot(x,y)   
+axis([0 1 -1e-1 1e-1])
